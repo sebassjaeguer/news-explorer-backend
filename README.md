@@ -2,9 +2,11 @@
 
 API del proyecto final de TripleTen. Gestiona usuarios, autenticación mediante JWT y artículos guardados en MongoDB.
 
-## Autor
+## Enlaces
 
-Sebastian Medina.
+- API: https://news-explorer-api-sebas.duckdns.org
+- Aplicación: https://news-explorer-sebas.duckdns.org
+- Repositorio del frontend: https://github.com/sebassjaeguer/news-explorer-frontend
 
 ## Tecnologías
 
@@ -13,21 +15,22 @@ Node.js, Express, MongoDB, Mongoose, bcryptjs, jsonwebtoken, celebrate, dotenv y
 ## Requisitos
 
 - Node.js y npm compatibles con las dependencias del proyecto.
-- MongoDB local instalado y en ejecución para el desarrollo.
+- MongoDB instalado y en ejecución para el desarrollo local.
 
 ## Instalación
 
 ```sh
 git clone https://github.com/sebassjaeguer/news-explorer-backend.git
 cd news-explorer-backend
-npm install
+git switch stage-back-end
+npm ci
 ```
 
 ## Desarrollo local
 
 El backend puede funcionar sin un archivo `.env`.
 
-Cuando no se configuran variables de entorno, utiliza:
+Si no se configuran variables de entorno, utiliza:
 
 - MongoDB: `mongodb://127.0.0.1:27017/newsexplorer`.
 - Una clave JWT de desarrollo definida en `config/env.js`.
@@ -39,7 +42,7 @@ Inicia el servidor:
 npm run dev
 ```
 
-Cuando se conecta a MongoDB, el servidor escucha en:
+Dirección local:
 
 ```text
 http://localhost:3001
@@ -74,19 +77,19 @@ Si cambias la clave JWT, inicia sesión nuevamente para obtener un token válido
 | --- | --- |
 | `npm run dev` | Ejecuta `app.js` y reinicia al cambiar archivos. |
 | `npm start` | Ejecuta `app.js` sin reinicio automático. |
-| `npm run lint` | Revisa el código con ESLint. |
+| `npm run lint` | Analiza el código con ESLint. |
 
 ## Rutas
 
 | Método | Ruta | Función | Requiere token |
 | --- | --- | --- | --- |
 | GET | `/` | Comprueba que el servidor responde. | No |
-| POST | `/signup` | Registra un usuario con nombre, correo y contraseña. | No |
+| POST | `/signup` | Registra un usuario. | No |
 | POST | `/signin` | Valida credenciales y devuelve `token` y `user`. | No |
-| GET | `/users/me` | Devuelve el usuario identificado por el token. | Sí |
-| GET | `/articles` | Consulta los artículos de ese usuario. | Sí |
-| POST | `/articles` | Guarda un artículo para ese usuario. | Sí |
-| DELETE | `/articles/:id` | Elimina un artículo de ese usuario. | Sí |
+| GET | `/users/me` | Devuelve los datos del usuario conectado. | Sí |
+| GET | `/articles` | Consulta los artículos guardados del usuario. | Sí |
+| POST | `/articles` | Guarda un artículo para el usuario. | Sí |
+| DELETE | `/articles/:id` | Elimina un artículo del usuario. | Sí |
 
 Las rutas protegidas reciben este encabezado:
 
@@ -114,7 +117,7 @@ Cada usuario puede consultar y eliminar únicamente sus propios artículos. Guar
 
 ## Validación y errores
 
-Las solicitudes se validan antes de ejecutar los controladores mediante celebrate y Joi. Los modelos también validan los datos almacenados.
+Las solicitudes se validan mediante celebrate y Joi antes de ejecutar los controladores. Los modelos también validan los datos almacenados.
 
 El manejo de errores está centralizado en `middlewares/errorHandler.js`.
 
@@ -133,8 +136,8 @@ Entre los códigos de respuesta utilizados están:
 
 El backend genera archivos de registro en su carpeta raíz:
 
-- `request.log`: registra las solicitudes recibidas.
-- `error.log`: registra las respuestas con códigos de error.
+- `request.log`: solicitudes recibidas.
+- `error.log`: respuestas con códigos de error.
 
 Cada entrada se guarda como una línea JSON. Los registros no incluyen contraseñas ni tokens.
 
@@ -142,29 +145,32 @@ Los archivos `.log` están excluidos mediante `.gitignore`.
 
 ## Configuración de producción
 
-En el servidor de producción deben configurarse estas variables:
+En el servidor se configuran estas variables en `.env`:
 
 ```dotenv
 NODE_ENV=production
-MONGO_URI=URI_DE_LA_BASE_DE_DATOS_DEL_SERVIDOR
-JWT_SECRET=CLAVE_SECRETA_ALEATORIA
+MONGO_URI=mongodb://127.0.0.1:27017/newsexplorer
+JWT_SECRET=REEMPLAZA_CON_UNA_CLAVE_ALEATORIA
 ```
 
-Los valores de ejemplo deben sustituirse por los reales.
+En producción, el backend exige `MONGO_URI` y `JWT_SECRET`.
 
-En producción, el backend exige `MONGO_URI` y `JWT_SECRET`. La clave de desarrollo no se utiliza como alternativa cuando falta `JWT_SECRET`.
+La clave de desarrollo no se utiliza como alternativa cuando falta `JWT_SECRET` en producción.
 
-Con las variables configuradas, inicia el servidor mediante:
+El archivo `.env` está excluido de Git.
 
-```sh
-npm start
-```
+## Publicación
 
-El archivo `.env` y los registros están excluidos de Git.
+La API está publicada en Google Cloud:
 
-## Despliegue
+https://news-explorer-api-sebas.duckdns.org
 
-Pendiente: publicar la API, configurar el dominio y HTTPS, y agregar aquí su dirección pública.
+- MongoDB se ejecuta en el servidor.
+- PM2 mantiene activo el proceso `news-explorer-backend`.
+- Nginx reenvía las solicitudes al puerto `3001`.
+- HTTPS está configurado mediante certificados de Let's Encrypt y Certbot.
+
+El frontend también accede al backend mediante `/api/` desde su propio dominio. Nginx elimina ese prefijo antes de reenviar la solicitud.
 
 ## Seguridad
 
@@ -172,8 +178,8 @@ Las contraseñas se almacenan como hashes mediante bcryptjs y no se devuelven en
 
 Los tokens JWT caducan a los siete días.
 
-El campo `owner` de los artículos está oculto por defecto y se consulta explícitamente cuando se necesita comprobar la propiedad.
+El campo `owner` de los artículos está oculto por defecto. Se consulta explícitamente cuando se necesita comprobar la propiedad.
 
-## Frontend
+## Autor
 
-[Repositorio del frontend](https://github.com/sebassjaeguer/news-explorer-frontend)
+Sebastian Medina.
