@@ -34,7 +34,7 @@ Si no se configuran variables de entorno, utiliza:
 
 - MongoDB: `mongodb://127.0.0.1:27017/newsexplorer`.
 - Una clave JWT de desarrollo definida en `config/env.js`.
-- Puerto: `3001`.
+- Puerto: `3000`.
 
 Inicia el servidor:
 
@@ -45,7 +45,7 @@ npm run dev
 Dirección local:
 
 ```text
-http://localhost:3001
+http://localhost:3000
 ```
 
 ### Configuración opcional con .env
@@ -167,7 +167,7 @@ https://news-explorer-api-sebas.duckdns.org
 
 - MongoDB se ejecuta en el servidor.
 - PM2 mantiene activo el proceso `news-explorer-backend`.
-- Nginx reenvía las solicitudes al puerto `3001`.
+- Nginx reenvía las solicitudes al puerto `3000`.
 - HTTPS está configurado mediante certificados de Let's Encrypt y Certbot.
 
 El frontend también accede al backend mediante `/api/` desde su propio dominio. Nginx elimina ese prefijo antes de reenviar la solicitud.

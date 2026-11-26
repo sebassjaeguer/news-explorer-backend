@@ -1,48 +1,29 @@
 require('dotenv').config();
 
 const express = require('express');
-const HttpError = require('./errors/HttpError');
-const errorHandler = require('./middlewares/errorHandler');
-const requestLogger = require('./middlewares/logger');
 
 const connectDB = require('./config/db');
 const Article = require('./models/article');
-const auth = require('./middlewares/auth');
+const routes = require('./routes');
 
-const { createUser, login } = require('./controllers/users');
-const {
-  validateSignup,
-  validateSignin,
-} = require('./middlewares/validation');
-
-const userRoutes = require('./routes/users');
-const articleRoutes = require('./routes/articles');
+const requestLogger = require('./middlewares/logger');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-const PORT = 3001;
+const PORT = Number(process.env.PORT || 3000);
 
 app.use(requestLogger);
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Servidor de News Explorer funcionando correctamente',
-  });
-});
-
-app.post('/signup', validateSignup, createUser);
-app.post('/signin', validateSignin, login);
-
-app.use('/users', auth, userRoutes);
-app.use('/articles', auth, articleRoutes);
-
-app.use((req, res, next) => {
-  next(new HttpError(404, 'Ruta no encontrada'));
-});
+app.use(routes);
 
 app.use(errorHandler);
 
 const startServer = async () => {
+  if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
+    throw new Error('PORT debe ser un número entero entre 1 y 65535');
+  }
+
   await connectDB();
   await Article.createIndexes();
 
