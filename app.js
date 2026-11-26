@@ -1,18 +1,26 @@
 require('dotenv').config();
 
 const express = require('express');
+const helmet = require('helmet');
 
+const { PORT, isProduction } = require('./config/env');
 const connectDB = require('./config/db');
 const Article = require('./models/article');
 const routes = require('./routes');
 
 const requestLogger = require('./middlewares/logger');
+const rateLimiter = require('./middlewares/rateLimiter');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-const PORT = Number(process.env.PORT || 3000);
+
+if (isProduction) {
+  app.set('trust proxy', 'loopback');
+}
 
 app.use(requestLogger);
+app.use(helmet());
+app.use(rateLimiter);
 app.use(express.json());
 
 app.use(routes);
@@ -20,14 +28,10 @@ app.use(routes);
 app.use(errorHandler);
 
 const startServer = async () => {
-  if (!Number.isInteger(PORT) || PORT < 1 || PORT > 65535) {
-    throw new Error('PORT debe ser un número entero entre 1 y 65535');
-  }
-
   await connectDB();
   await Article.createIndexes();
 
-  app.listen(PORT, () => {
+  app.listen(PORT, '127.0.0.1', () => {
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
   });
 };

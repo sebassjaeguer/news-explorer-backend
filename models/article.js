@@ -44,6 +44,3 @@ const articleSchema = new mongoose.Schema({
 articleSchema.index({ owner: 1, url: 1 }, { unique: true });
 
 module.exports = mongoose.model('Article', articleSchema);
-
-
-

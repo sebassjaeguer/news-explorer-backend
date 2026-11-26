@@ -1,5 +1,10 @@
 const Article = require('../models/article');
 const HttpError = require('../errors/HttpError');
+const { HTTP_STATUS } = require('../config/constants');
+const {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} = require('../config/messages');
 
 const createArticle = async (req, res, next) => {
   const {
@@ -27,13 +32,15 @@ const createArticle = async (req, res, next) => {
     const savedArticle = article.toObject();
     delete savedArticle.owner;
 
-    return res.status(201).json(savedArticle);
+    return res.status(HTTP_STATUS.CREATED).json(savedArticle);
   } catch (error) {
     if (error.code === 11000) {
-      return next(new HttpError(
-        409,
-        'Ya guardaste esta noticia. Recarga la página para actualizar tus guardados.'
-      ));
+      return next(
+        new HttpError(
+          HTTP_STATUS.CONFLICT,
+          ERROR_MESSAGES.ARTICLE_ALREADY_EXISTS,
+        ),
+      );
     }
 
     return next(error);
@@ -46,7 +53,7 @@ const getArticles = async (req, res, next) => {
       owner: req.user._id,
     });
 
-    return res.json(articles);
+    return res.status(HTTP_STATUS.OK).json(articles);
   } catch (error) {
     return next(error);
   }
@@ -59,13 +66,19 @@ const deleteArticle = async (req, res, next) => {
 
     if (!article) {
       return next(
-        new HttpError(404, 'Artículo no encontrado')
+        new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          ERROR_MESSAGES.ARTICLE_NOT_FOUND,
+        ),
       );
     }
 
     if (!article.owner.equals(req.user._id)) {
       return next(
-        new HttpError(403, 'No puedes eliminar artículos de otra cuenta')
+        new HttpError(
+          HTTP_STATUS.FORBIDDEN,
+          ERROR_MESSAGES.ARTICLE_DELETE_FORBIDDEN,
+        ),
       );
     }
 
@@ -76,12 +89,15 @@ const deleteArticle = async (req, res, next) => {
 
     if (!deletedArticle) {
       return next(
-        new HttpError(404, 'Artículo no encontrado')
+        new HttpError(
+          HTTP_STATUS.NOT_FOUND,
+          ERROR_MESSAGES.ARTICLE_NOT_FOUND,
+        ),
       );
     }
 
-    return res.json({
-      message: 'Artículo eliminado',
+    return res.status(HTTP_STATUS.OK).json({
+      message: SUCCESS_MESSAGES.ARTICLE_DELETED,
     });
   } catch (error) {
     return next(error);

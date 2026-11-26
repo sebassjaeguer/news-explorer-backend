@@ -1,17 +1,9 @@
 const mongoose = require('mongoose');
 
+const { MONGO_URI } = require('./env');
+
 const connectDB = async () => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  const configuredUri = process.env.MONGO_URI;
-
-  if (isProduction && !configuredUri) {
-    throw new Error('Debes configurar MONGO_URI en producción');
-  }
-
-  const mongoUri =
-    configuredUri || 'mongodb://127.0.0.1:27017/newsexplorer';
-
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(MONGO_URI);
 
   console.log('MongoDB conectado correctamente');
 };

@@ -13,19 +13,33 @@ function writeLog(filename, entry) {
 }
 
 function requestLogger(req, res, next) {
-  const entry = {
+  const startedAt = Date.now();
+
+  const requestEntry = {
     timestamp: new Date().toISOString(),
     method: req.method,
     path: req.path,
   };
 
-  writeLog('request.log', entry);
+  writeLog('request.log', {
+    ...requestEntry,
+    event: 'request',
+  });
 
   res.once('finish', () => {
+    const responseEntry = {
+      ...requestEntry,
+      timestamp: new Date().toISOString(),
+      event: 'response',
+      statusCode: res.statusCode,
+      durationMs: Date.now() - startedAt,
+    };
+
+    writeLog('request.log', responseEntry);
+
     if (res.statusCode >= 400) {
       writeLog('error.log', {
-        ...entry,
-        statusCode: res.statusCode,
+        ...responseEntry,
         message: STATUS_CODES[res.statusCode] || 'HTTP error',
       });
     }

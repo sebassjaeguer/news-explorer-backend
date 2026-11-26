@@ -1,30 +1,51 @@
 const { isCelebrateError } = require('celebrate');
+
 const HttpError = require('../errors/HttpError');
+const { HTTP_STATUS } = require('../config/constants');
+const { ERROR_MESSAGES } = require('../config/messages');
 
 function errorHandler(error, req, res, next) {
-  if (res.headersSent) return next(error);
+  if (res.headersSent) {
+    return next(error);
+  }
 
   if (isCelebrateError(error)) {
-    return res.status(400).json({ message: 'Revisa los datos enviados' });
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: ERROR_MESSAGES.INVALID_DATA,
+    });
   }
 
   if (error.type === 'entity.parse.failed') {
-    return res.status(400).json({ message: 'El cuerpo debe ser un JSON válido' });
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: ERROR_MESSAGES.INVALID_JSON,
+    });
   }
 
   if (error.type === 'entity.too.large') {
-    return res.status(413).json({ message: 'La petición es demasiado grande' });
+    return res.status(HTTP_STATUS.PAYLOAD_TOO_LARGE).json({
+      message: ERROR_MESSAGES.PAYLOAD_TOO_LARGE,
+    });
   }
 
   if (error.name === 'ValidationError' || error.name === 'CastError') {
-    return res.status(400).json({ message: 'Revisa los datos enviados' });
+    return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      message: ERROR_MESSAGES.INVALID_DATA,
+    });
   }
 
-  if (error instanceof HttpError && error.statusCode >= 400 && error.statusCode < 500) {
-    return res.status(error.statusCode).json({ message: error.message });
+  if (
+    error instanceof HttpError
+    && error.statusCode >= HTTP_STATUS.BAD_REQUEST
+    && error.statusCode < HTTP_STATUS.INTERNAL_SERVER_ERROR
+  ) {
+    return res.status(error.statusCode).json({
+      message: error.message,
+    });
   }
 
-  return res.status(500).json({ message: 'Ocurrió un error en el servidor' });
+  return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+    message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+  });
 }
 
 module.exports = errorHandler;
