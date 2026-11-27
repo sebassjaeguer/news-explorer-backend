@@ -2,17 +2,18 @@
   "name": "news-explorer-backend",
   "version": "1.0.0",
   "description": "Backend del proyecto final de TripleTen.",
-  "main": "index.js",
- "scripts": {
-  "start": "node app.js",
-  "dev": "node --watch app.js"
-},
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "lint": "eslint ."
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sebassjaeguer/news-explorer-backend.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sebastian Medina",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
@@ -20,6 +21,18 @@
   },
   "homepage": "https://github.com/sebassjaeguer/news-explorer-backend#readme",
   "dependencies": {
-    "express": "^5.3.0"
+    "bcryptjs": "^3.0.3",
+    "celebrate": "^16.0.0",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.4"
+  },
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-plugin-import": "^2.32.0"
   }
 }
