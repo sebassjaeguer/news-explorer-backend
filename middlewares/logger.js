@@ -2,6 +2,9 @@ const { appendFile } = require('node:fs');
 const path = require('node:path');
 const { STATUS_CODES } = require('node:http');
 
+const { HTTP_STATUS } = require('../config/constants');
+const { ERROR_MESSAGES } = require('../config/messages');
+
 function writeLog(filename, entry) {
   const filePath = path.join(__dirname, '..', filename);
 
@@ -37,10 +40,15 @@ function requestLogger(req, res, next) {
 
     writeLog('request.log', responseEntry);
 
-    if (res.statusCode >= 400) {
+    if (res.statusCode >= HTTP_STATUS.BAD_REQUEST) {
+      const defaultReason = res.statusCode === HTTP_STATUS.TOO_MANY_REQUESTS
+        ? ERROR_MESSAGES.TOO_MANY_REQUESTS
+        : 'Respuesta de error sin una causa específica registrada';
+
       writeLog('error.log', {
         ...responseEntry,
         message: STATUS_CODES[res.statusCode] || 'HTTP error',
+        reason: res.locals.errorReason || defaultReason,
       });
     }
   });
